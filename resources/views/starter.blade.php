@@ -26,7 +26,14 @@
             </ul>
         </div>
         <div class="page-category">Hello world!</div>
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Hello, {{ Auth::user()->name }}</h1>
+                <p>This is a simple starter page.</p>
+            </div>
+        </div>
     </div>
+    
 </div>
 @endsection
 

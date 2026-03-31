@@ -30,7 +30,7 @@
           <div class="text-center">
             <h1 class="display-1">403</h1>
             <p class="lead">Unauthorized Access</p>
-            <a href="{{ route('home') }}" class="btn btn-primary">Go Back</a>
+            <a href="{{ redirect('/') }}" class="btn btn-primary">Go Back</a>
           </div>
       </div>
     </div>

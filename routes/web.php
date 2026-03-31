@@ -22,19 +22,21 @@ Route::middleware('auth')->group(function () {
         return view('starter');
     });
 
-    Route::get('/category', [CategoryController::class, 'index'])->name('category.index');
+    Route::middleware('role:1')->group(function () {
+        Route::get('/category', [CategoryController::class, 'index'])->name('category.index');
 
-    Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
+        Route::get('/category/create', [CategoryController::class, 'create'])->name('category.create');
 
-    Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
+        Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
 
-    Route::get('/category/{category}/edit', [CategoryController::class, 'edit'])->name('category.edit');
+        Route::get('/category/{category}/edit', [CategoryController::class, 'edit'])->name('category.edit');
 
-    Route::put('/category/{category}/edit', [CategoryController::class, 'update'])->name('category.update');
+        Route::put('/category/{category}/edit', [CategoryController::class, 'update'])->name('category.update');
 
-    Route::delete('/category/{category}/destroy', [CategoryController::class, 'destroy'])->name('category.destroy');
+        Route::delete('/category/{category}/destroy', [CategoryController::class, 'destroy'])->name('category.destroy');
 
-    Route::get('/student', [StudentController::class, 'index']);
+        Route::get('/student', [StudentController::class, 'index']);
+    });
 });
 
 require __DIR__ . '/auth.php';
