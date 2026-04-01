@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
@@ -13,7 +14,7 @@ class BookController extends Controller
      */
     public function index()
     {
-        $books = Book::all();
+        $books = Book::with('category')->get();
         return view("book.index", compact("books"));
     }
 
@@ -31,24 +32,28 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
+            'isbn' => 'required|string|max:13|unique:book,isbn',
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
+            'publish_year' => 'required|integer',
+            'description' => 'nullable|string|max:300',
+            'category_id' => 'required|exists:category,id',
+            'cover' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
         ]);
+        if ($request->hasFile('cover')) {
+            $fileName = $validatedData['isbn'] . '.' . $request->file('cover')->getClientOriginalExtension();
+            $request->file('cover')->storeAs('uploads', $fileName, 'public');
+            $validatedData['cover'] = $fileName;
+        } else {
+            unset($validatedData['cover']);
+        }
         // NEW
-        Book::create($request->all());
+        Book::create($validatedData);
         // OLD
         // $book = new Book($request->all());
         // $book->save();
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Book $book)
-    {
-        return view('', compact(''));
+        return redirect()->route('book.index');
     }
 
     /**
@@ -65,12 +70,25 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
+            'publish_year' => 'required|integer',
+            'description' => 'nullable|string|max:300',
+            'category_id' => 'required|exists:category,id',
+            'cover' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
         ]);
-        $book->update($request->all());
+        if ($request->hasFile('cover')) {
+            if ($book->cover) {
+                Storage::disk('public')->delete('uploads/' . $book->cover);
+            }
+            $fileName = $book->isbn . '.' . $request->file('cover')->getClientOriginalExtension();
+            $request->file('cover')->storeAs('uploads', $fileName, 'public');
+            $validatedData['cover'] = $fileName;
+        } else {
+            unset($validatedData['cover']);
+        }
+        $book->update($validatedData);
         return redirect()->route('book.index');
     }
 
@@ -79,6 +97,9 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
+        if ($book->cover) {
+            Storage::disk('public')->delete('uploads/' . $book->cover);
+        }
         $book->delete();
         return redirect()->route('book.index');
     }

@@ -18,9 +18,16 @@ class Book extends Model
         'category_id',
     ];
 
+    // protected $with = ['category'];
+
     protected $primaryKey = "isbn";
 
     protected $keyType = 'string';
 
     public $incrementing =  false;
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }
